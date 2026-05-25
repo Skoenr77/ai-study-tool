@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlalchemy
+python-multipart
+python-jose
+requests
+pymupdf
+python-docx

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>AI Study Assistant</h1>
+
+    <button onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+    <textarea
+        id="notes"
+        placeholder="Paste your study notes here OR upload a file..."
+    ></textarea>
+
+    <div class="controls">
+        <select id="mode">
+            <option value="summary">Summary</option>
+            <option value="keypoints">Key Points</option>
+            <option value="quiz">Quiz Questions</option>
+            <option value="flashcards">Flashcards</option>
+        </select>
+
+        <select id="language">
+            <option value="english">English</option>
+            <option value="arabic">Arabic</option>
+        </select>
+    </div>
+
+    <div class="controls">
+        <input
+            type="file"
+            id="fileInput"
+            accept=".txt,.pdf,.docx"
+        >
+
+        <button onclick="generate()">Generate</button>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <h2>Result</h2>
+
+    <div class="small-buttons">
+        <button onclick="copyResult()">Copy</button>
+        <button onclick="downloadPDF()">PDF</button>
+        <button onclick="speakResult()">🔊 Speak</button>
+        <button onclick="stopSpeech()">■ Stop</button>
+    </div>
+
+    <div id="result-box">No result generated.</div>
+</div>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

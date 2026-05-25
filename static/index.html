@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Assistant</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="top-bar">
+        <h1>AI Study Assistant</h1>
+        <button class="small-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    </div>
+
+    <textarea
+        id="notes"
+        placeholder="Paste your study notes here..."
+    ></textarea>
+
+    <div class="controls">
+        <select id="mode">
+            <option value="Summary">Summary</option>
+            <option value="KeyPoints">Key Points</option>
+            <option value="Quiz">Quiz Questions</option>
+            <option value="Flashcards">Flashcards</option>
+        </select>
+
+        <select id="language">
+            <option value="English">English</option>
+            <option value="Arabic">Arabic</option>
+        </select>
+    </div>
+
+    <input type="file" id="fileInput">
+
+    <button onclick="generateNotes()">Generate</button>
+
+    <div id="progress-container">
+        <div id="progress"></div>
+    </div>
+
+    <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p>AI is analyzing your notes...</p>
+    </div>
+
+    <div id="result-box">
+        <div class="result-header">
+            <h2>Result</h2>
+
+            <div class="result-actions">
+                <button class="small-btn" onclick="copyResult()">Copy</button>
+                <button class="small-btn" onclick="downloadPDF()">PDF</button>
+                <button class="small-btn" onclick="speakResult()">🔊 Speak</button>
+                <button class="small-btn" onclick="stopSpeech()">⏹ Stop</button>
+            </div>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+</div>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>
