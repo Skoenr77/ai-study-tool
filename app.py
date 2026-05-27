@@ -127,7 +127,6 @@ def extract_text(uploaded_file, content):
     elif filename.endswith(".docx"):
         file_stream = io.BytesIO(content)
         doc = docx.Document(file_stream)
-
         return "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
 
     else:
@@ -135,6 +134,9 @@ def extract_text(uploaded_file, content):
 
 
 def ask_groq(prompt):
+    if not GROQ_API_KEY:
+        raise Exception("GROQ_API_KEY not found")
+
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
@@ -159,7 +161,7 @@ def ask_groq(prompt):
     )
 
     if response.status_code != 200:
-        raise HTTPException(status_code=500, detail=response.text)
+        raise Exception(response.text)
 
     result = response.json()
     return result["choices"][0]["message"]["content"]
@@ -167,30 +169,36 @@ def ask_groq(prompt):
 
 @app.post("/summarize")
 def summarize(data: NotesRequest):
-    if not data.notes.strip():
-        raise HTTPException(status_code=400, detail="Notes are empty")
+    try:
+        if not data.notes.strip():
+            raise HTTPException(status_code=400, detail="Notes are empty")
 
-    if data.language.lower() == "arabic":
-        task_map = {
-            "summary": "قم بفهم المحتوى ثم اكتب ملخصًا عربيًا واضحًا ومنظمًا بدون ترجمة حرفية.",
-            "keypoints": "استخرج النقاط الرئيسية بالعربية.",
-            "quiz": "أنشئ اختبارًا بالعربية مع الإجابات.",
-            "flashcards": "أنشئ بطاقات تعليمية بالعربية."
-        }
-    else:
-        task_map = {
-            "summary": "Summarize in English.",
-            "keypoints": "Extract key points in English.",
-            "quiz": "Create quiz questions with answers in English.",
-            "flashcards": "Create flashcards in English."
-        }
+        if data.language.lower() == "arabic":
+            task_map = {
+                "summary": "قم بفهم المحتوى ثم اكتب ملخصًا عربيًا واضحًا ومنظمًا بدون ترجمة حرفية.",
+                "keypoints": "استخرج النقاط الرئيسية بالعربية.",
+                "quiz": "أنشئ اختبارًا بالعربية مع الإجابات.",
+                "flashcards": "أنشئ بطاقات تعليمية بالعربية."
+            }
+        else:
+            task_map = {
+                "summary": "Summarize in English.",
+                "keypoints": "Extract key points in English.",
+                "quiz": "Create quiz questions with answers in English.",
+                "flashcards": "Create flashcards in English."
+            }
 
-    instruction = task_map.get(data.mode, task_map["summary"])
-    prompt = f"{instruction}\n\n{data.notes}"
+        instruction = task_map.get(data.mode, task_map["summary"])
+        prompt = f"{instruction}\n\n{data.notes}"
 
-    result = ask_groq(prompt)
+        result = ask_groq(prompt)
 
-    return {"result": result}
+        return {"result": result}
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return {"error": str(e)}
 
 
 @app.post("/upload-process")
@@ -199,34 +207,40 @@ async def upload_process(
     mode: str = Form(...),
     language: str = Form(...)
 ):
-    content = await file.read()
-    text = extract_text(file, content)
+    try:
+        content = await file.read()
+        text = extract_text(file, content)
 
-    if not text.strip():
-        raise HTTPException(status_code=400, detail="Empty file")
+        if not text.strip():
+            raise HTTPException(status_code=400, detail="Empty file")
 
-    if language.lower() == "arabic":
-        task_map = {
-            "summary": "لخص المحتوى بالعربية بشكل طبيعي وواضح.",
-            "keypoints": "استخرج النقاط الرئيسية بالعربية.",
-            "quiz": "أنشئ اختبارًا بالعربية مع الإجابات.",
-            "flashcards": "أنشئ بطاقات تعليمية بالعربية."
-        }
-    else:
-        task_map = {
-            "summary": "Summarize in English.",
-            "keypoints": "Extract key points in English.",
-            "quiz": "Create quiz questions with answers in English.",
-            "flashcards": "Create flashcards in English."
-        }
+        if language.lower() == "arabic":
+            task_map = {
+                "summary": "لخص المحتوى بالعربية بشكل طبيعي وواضح.",
+                "keypoints": "استخرج النقاط الرئيسية بالعربية.",
+                "quiz": "أنشئ اختبارًا بالعربية مع الإجابات.",
+                "flashcards": "أنشئ بطاقات تعليمية بالعربية."
+            }
+        else:
+            task_map = {
+                "summary": "Summarize in English.",
+                "keypoints": "Extract key points in English.",
+                "quiz": "Create quiz questions with answers in English.",
+                "flashcards": "Create flashcards in English."
+            }
 
-    instruction = task_map.get(mode, task_map["summary"])
-    chunks = chunk_text(text)
-    final_result = []
+        instruction = task_map.get(mode, task_map["summary"])
+        chunks = chunk_text(text)
+        final_result = []
 
-    for chunk in chunks:
-        prompt = f"{instruction}\n\n{chunk}"
-        result = ask_groq(prompt)
-        final_result.append(result)
+        for chunk in chunks:
+            prompt = f"{instruction}\n\n{chunk}"
+            result = ask_groq(prompt)
+            final_result.append(result)
 
-    return {"result": "\n\n".join(final_result)}
+        return {"result": "\n\n".join(final_result)}
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return {"error": str(e)}
